@@ -17,42 +17,9 @@ Alterations
 The older rest-module example was using rfc4627.erl which could not be found.
 The latest version from YAWS comes with its own json2-parser.
 
+20210407: The lastest master branch from git://github.com/erlyaws/yaws.git now
+contains the json2-obj_fetch/3 function.
 
-The following function was added to json2 in yaws:
-```bash
-$ git diff --patch-with-stat 
- src/json2.erl | 11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
-
-diff --git a/src/json2.erl b/src/json2.erl
-index 64a8a4f9..de157de7 100644
---- a/src/json2.erl
-+++ b/src/json2.erl
-@@ -16,7 +16,7 @@
- 
- -module(json2).
- -export([encode/1, decode_string/1, decode/2]).
---export([is_obj/1, obj_new/0, obj_fetch/2, obj_find/2, obj_is_key/2]).
-+-export([is_obj/1, obj_new/0, obj_fetch/2, obj_fetch/3, obj_find/2, obj_is_key/2]).
- -export([obj_store/3, obj_from_list/1, obj_fold/3]).
- -export([test/0]).
- -author("Jim Larson <jalarson@amazon.com>, Robert Wai-Chi Chu <robchu@amazon.com>").
-@@ -607,6 +607,15 @@ obj_fetch(Key, {struct, Props}) when is_list(Props) ->
-             Value
-     end.
- 
-+obj_fetch(Key, {struct, Props},Default) when is_list(Props) ->
-+    case proplists:get_value(Key, Props) of
-+        undefined ->
-+            Default;
-+        Value ->
-+            Value
-+    end.
-+
-+
- %% Fetch an object member's value, or indicate that there is no such member.
- %% Return {ok, Value} or 'error'.
-```
 
 The differences from the original O-Reilly rest file vs the newer rest_airport.erl:
 
@@ -106,29 +73,30 @@ $ rebar3 shell
 ```
 
 Then inside the shell execute:
-```erlang   
-> ybed_sup:start_link().
+```erlang
+> observer:start().
 ```
 
+This will allow you to inspect the supervision-tree.
 
 Testing
 -------
 
 1. GET:
 ```bash
-$ curl -X 'GET' 'http://localhost:8888' -H 'Content-Type: application/json'
+$ curl -X 'GET' 'http://localhost:8888/rest/airport' -H 'Content-Type: application/json'
 {"data":""}
 ```
 
 2. POST
 ```bash
-curl -X 'POST' 'http://localhost:8888' -H 'Content-Type: application/json' -d '{ "airport": "JFK", "city": "New York", "country": "US", "name": "John F Kennedy" }'
+curl -X 'POST' 'http://localhost:8888/rest/airport' -H 'Content-Type: application/json' -d '{ "airport": "JFK", "city": "New York", "country": "US", "name": "John F Kennedy" }'
 { "airport": "JFK", "city": "New York", "country": "US", "name": "John F Kennedy" }
 ```
 
 3. GET
 ```bash
-curl -X 'GET' 'http://localhost:8888' -H 'Content-Type: application/json'
+curl -X 'GET' 'http://localhost:8888/rest/airport' -H 'Content-Type: application/json'
 {"data": [{ "airport": "JFK", "city": "New York", "country": "US", "name": "John F Kennedy" }]
 ```
 
